@@ -22,32 +22,11 @@ services:
       - /dev/net:/dev/net:z
       - /media/server/config/openvpn:/vpn
     ports: 
-      - "32400:32400" # PLEX
-      - "32400:32400/udp" # PLEX
-      - "32469:32469" # PLEX
-      - "32469:32469/udp" # PLEX
-      - "1900:1900/udp" # PLEX
       - "8989:8989" # SONARR
-      - "5050:5050" # Couchpotato
+      - "7878:7878" # RADARR
       - "8080:8080" # SABNZBD
       - "9090:9090" # SABNZBD
     command: "-r 192.168.178.0/24"
-  plex:
-    image: linuxserver/plex
-    container_name: plex
-    network_mode: "service:vpn"
-    restart: unless-stopped
-    depends_on: 
-      - vpn
-    environment: 
-      VERSION: docker
-      PUID: 996
-      PGID: 114
-    volumes:
-      - /media/server/config/plex:/config
-      - tvshows:/tv
-      - movies:/movies
-      - /media/server/media/transcoding:/transcode
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
@@ -63,22 +42,47 @@ services:
       - /media/server/config/sonarr:/config
       - tvshows:/tv
       - downloads:/downloads
-  couchpotato:
-    image: linuxserver/couchpotato
-    container_name: couchpotato
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
     network_mode: "service:vpn"
     restart: unless-stopped
     depends_on:
       - vpn
     environment: 
       TZ: "Europe/Berlin"
-      VERSION: latest
-      PUID: 998
+      PUID: 993
       PGID: 114
     volumes:
-      - /media/server/config/couchpotato:/config
+      - /media/server/config/radarr:/config
       - movies:/movies
       - downloads:/downloads
+  tautulli:
+    image: linuxserver/tautulli
+    container_name: tautulli
+    network_mode: "service:vpn"
+    restart: unless-stopped
+    depends_on:
+      - vpn
+    environment: 
+      TZ: "Europe/Berlin"
+      PUID: 992
+      PGID: 114
+    volumes:
+      - /media/server/config/tautulli:/config
+  heimdall :
+    image: linuxserver/heimdall 
+    container_name: heimdall 
+    restart: unless-stopped
+    ports: 
+      - 8090:80
+      - 8043:443
+    environment: 
+      TZ: "Europe/Berlin"
+      PUID: 991
+      PGID: 114
+    volumes:
+      - /media/server/config/heimdall:/config
   sabnzbd:
     image: linuxserver/sabnzbd
     container_name: sabnzbd
@@ -95,6 +99,38 @@ services:
       - /media/server/config/sabnzbd:/config
       - movies:/movies
       - downloads:/downloads
+  # plex:
+  #   image: linuxserver/plex
+  #   container_name: plex
+  #   network_mode: "service:vpn"
+  #   restart: unless-stopped
+  #   depends_on: 
+  #     - vpn
+  #   environment: 
+  #     VERSION: docker
+  #     PUID: 996
+  #     PGID: 114
+  #   volumes:
+  #     - /media/server/config/plex:/config
+  #     - tvshows:/tv
+  #     - movies:/movies
+  #     - /media/server/media/transcoding:/transcode
+  # couchpotato:
+  #   image: linuxserver/couchpotato
+  #   container_name: couchpotato
+  #   network_mode: "service:vpn"
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - vpn
+  #   environment: 
+  #     TZ: "Europe/Berlin"
+  #     VERSION: latest
+  #     PUID: 998
+  #     PGID: 114
+  #   volumes:
+  #     - /media/server/config/couchpotato:/config
+  #     - movies:/movies
+  #     - downloads:/downloads
 
 networks:
   default:
@@ -117,4 +153,10 @@ volumes:
     driver_opts: 
       type: none
       device: /media/server/media/downloads
+      o: bind
+  incomplete_downloads:
+    driver: local
+    driver_opts: 
+      type: none
+      device: /media/server/media/downloads/incomplete
       o: bind
