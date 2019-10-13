@@ -43,7 +43,7 @@ services:
     environment: 
       VERSION: docker
       PUID: 996
-      GUID: 114
+      PGID: 114
     volumes:
       - /media/server/config/plex:/config
       - tvshows:/data/tv
@@ -60,7 +60,7 @@ services:
     environment: 
       TZ: "Europe/Berlin"
       PUID: 997
-      GUID: 114
+      PGID: 114
     volumes:
       - /media/server/config/sonarr:/config
       - tvshows:/data/tv
@@ -77,7 +77,7 @@ services:
       TZ: "Europe/Berlin"
       VERSION: latest
       PUID: 998
-      GUID: 114
+      PGID: 114
     volumes:
       - /media/server/config/couchpotato:/config
       - movies:/data/movies
