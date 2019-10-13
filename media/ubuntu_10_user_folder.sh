@@ -33,7 +33,7 @@ chown sabnzbd:media $ROOT_DIR/incomplete
 chmod 775 $TRANSCODING_DIR
 chown plex:media $TRANSCODING_DIR
 
-apps=( plex sonarr couchpotato sabnzbd openvpn)
+apps=( plex sonarr couchpotato sabnzbd openvpn )
 for app in "${apps[@]}"
 do
   mkdir -p "$CONF_DIR"/"$app"

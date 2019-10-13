@@ -29,7 +29,7 @@ services: :
       - "32469:32469/udp" # PLEX
       - "5353:5353/udp" # PLEX
       - "1900:1900/udp" # PLEX
-    command: "-r 192.168.178.0/24"
+    command: "-r 192.168.178.0/24 -v 'fra-a01.wlvpn.com;pixeljonas2;h%QH;3qogalH9E'"
   plex:
     image: linuxserver/plex
     container_name: plex
