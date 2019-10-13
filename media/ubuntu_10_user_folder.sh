@@ -18,7 +18,7 @@ useradd -r -s /bin/false -G media sabnzbd
 useradd -r -s /bin/false -G media openvpn
 
 # Create directories and change ownership
-mkdir -p $CONF_DIR $MEDIA_DIR $DOWNLOAD_DIR $MOVIE_DIR $TVSHOW_DIR $TRANSCODING_DIR
+mkdir -p $CONF_DIR $MEDIA_DIR $DOWNLOAD_DIR $MOVIE_DIR $TVSHOW_DIR $TRANSCODING_DIR "$ROOT_DIR/incomplete"
 
 chmod 775 $MOVIE_DIR
 chown couchpotato:media $MOVIE_DIR
