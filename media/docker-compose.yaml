@@ -45,9 +45,9 @@ services:
       PGID: 114
     volumes:
       - /media/server/config/plex:/config
-      - tvshows:/data/tv
-      - movies:/data/movies
-      - /media/server/media/transcoding:/data/transcoding
+      - tvshows:/tv
+      - movies:/movies
+      - /media/server/media/transcoding:/transcode
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
@@ -61,7 +61,7 @@ services:
       PGID: 114
     volumes:
       - /media/server/config/sonarr:/config
-      - tvshows:/data/tv
+      - tvshows:/tv
       - downloads:/downloads
   couchpotato:
     image: linuxserver/couchpotato
@@ -77,7 +77,7 @@ services:
       PGID: 114
     volumes:
       - /media/server/config/couchpotato:/config
-      - movies:/data/movies
+      - movies:/movies
       - downloads:/downloads
   sabnzbd:
     image: linuxserver/sabnzbd
@@ -90,10 +90,10 @@ services:
       TZ: "Europe/Berlin"
       VERSION: latest
       PUID: 995
-      GUID: 114
+      PGID: 114
     volumes:
       - /media/server/config/sabnzbd:/config
-      - movies:/data/movies
+      - movies:/movies
       - downloads:/downloads
 
 networks:
