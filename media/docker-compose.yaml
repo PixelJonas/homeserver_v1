@@ -1,5 +1,5 @@
-version: '3.7'
-services: :
+version: '3'
+services:
   vpn:
     image: dperson/openvpn-client
     container_name: openvpn
@@ -53,6 +53,14 @@ networks:
 
 volumes: 
   tvshows:
-    source: /media/server/media/tvshows
+    driver: local
+    driver_opts: 
+      type: none
+      device: /media/server/media/tvshows
+      o: bind
   movies:
-    source: /media/server/media/movies
+    driver: local
+    driver_opts: 
+      type: none
+      device: /media/server/media/movies
+      o: bind
