@@ -1,0 +1,58 @@
+version: '3.7'
+services: :
+  vpn:
+    image: dperson/openvpn-client
+    container_name: openvpn
+    user: openvpn
+    cap_add:
+      - net_admin
+    security_opt: 
+      - label:disable
+    environment: 
+      TZ: Europe/Berlin
+    networks: 
+      - default
+    read_only: true
+    tmpfs: 
+      - /run
+      - /tmp
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    volumes: 
+      - /dev/net:/dev/net:z
+      - /media/server/config/openvpn:/vpn
+    ports: 
+      - "32400:32400" # PLEX
+      - "32400:32400/udp" # PLEX
+      - "32469:32469" # PLEX
+      - "32469:32469/udp" # PLEX
+      - "5353:5353/udp" # PLEX
+      - "1900:1900/udp" # PLEX
+    command: "-r 192.168.178.0/24"
+  plex:
+    image: linuxserver/plex
+    container_name: plex
+    user: plex
+    network_mode: "service:vpn"
+    restart: unless-stopped
+    depends_on: 
+      - vpn
+    environment: 
+      VERSION: docker
+      PUID: 1000
+      GUID: 1000
+    volumes:
+      - /media/server/config/plex:/config
+      - tvshows:/data/tv
+      - movies:/data/movies
+      - /media/server/media/transcoding:/data/transcoding
+
+networks:
+  default:
+
+volumes: 
+  tvshows:
+    source: /media/server/media/tvshows
+  movies:
+    source: /media/server/media/movies
