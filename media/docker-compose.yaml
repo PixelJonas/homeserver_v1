@@ -27,6 +27,10 @@ services:
       - "32469:32469" # PLEX
       - "32469:32469/udp" # PLEX
       - "1900:1900/udp" # PLEX
+      - "8989:8989" # SONARR
+      - "5050:5050" # Couchpotato
+      - "8080:8080" # SABNZBD
+      - "9090:9090" # SABNZBD
     command: "-r 192.168.178.0/24"
   plex:
     image: linuxserver/plex
@@ -38,13 +42,63 @@ services:
       - vpn
     environment: 
       VERSION: docker
-      PUID: 1000
-      GUID: 1000
+      PUID: 996
+      GUID: 114
     volumes:
       - /media/server/config/plex:/config
       - tvshows:/data/tv
       - movies:/data/movies
       - /media/server/media/transcoding:/data/transcoding
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    user: sonarr
+    network_mode: "service:vpn"
+    restart: unless-stopped
+    depends_on:
+      - vpn
+    environment: 
+      TZ: "Europe/Berlin"
+      PUID: 997
+      GUID: 114
+    volumes:
+      - /media/server/config/sonarr:/config
+      - tvshows:/data/tv
+      - downloads:/downloads
+  couchpotato:
+    image: linuxserver/couchpotato
+    container_name: couchpotato
+    user: couchpotato
+    network_mode: "service:vpn"
+    restart: unless-stopped
+    depends_on:
+      - vpn
+    environment: 
+      TZ: "Europe/Berlin"
+      VERSION: latest
+      PUID: 998
+      GUID: 114
+    volumes:
+      - /media/server/config/couchpotato:/config
+      - movies:/data/movies
+      - downloads:/downloads
+  sabnzbd:
+    image: linuxserver/sabnzbd
+    container_name: sabnzbd
+    user: sabnzbd
+    network_mode: "service:vpn"
+    restart: unless-stopped
+    depends_on:
+      - vpn
+    environment: 
+      TZ: "Europe/Berlin"
+      VERSION: latest
+      PUID: 995
+      GUID: 114
+    volumes:
+      - /media/server/config/sabnzbd:/config
+      - movies:/data/movies
+      - downloads:/downloads
 
 networks:
   default:
@@ -61,4 +115,10 @@ volumes:
     driver_opts: 
       type: none
       device: /media/server/media/movies
+      o: bind
+  downloads:
+    driver: local
+    driver_opts: 
+      type: none
+      device: /media/server/media/downloads
       o: bind
