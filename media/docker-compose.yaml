@@ -30,7 +30,6 @@ services:
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
-    network_mode: "service:vpn"
     restart: unless-stopped
     depends_on:
       - vpn
@@ -45,7 +44,6 @@ services:
   radarr:
     image: linuxserver/radarr
     container_name: radarr
-    network_mode: "service:vpn"
     restart: unless-stopped
     depends_on:
       - vpn
@@ -61,6 +59,8 @@ services:
     image: linuxserver/tautulli
     container_name: tautulli
     restart: unless-stopped
+    ports:
+      - 8181:8181
     environment: 
       TZ: "Europe/Berlin"
       PUID: 992
