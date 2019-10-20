@@ -128,7 +128,7 @@ services:
   deconz:
     image: marthoc/deconz
     container_name: deconz_service
-    restart: unless-stopeed
+    restart: unless-stopped
     ports:
       - "40850:40850"
       - "40860:40860"
