@@ -20,7 +20,7 @@ services:
     tty: true
     volumes: 
       - /dev/net:/dev/net:z
-      - /media/server/config/openvpn:/vpn
+      - ${CONF_DIR}/openvpn:/vpn
     ports: 
       - "8080:8080" # SABNZBD
       - "9090:9090" # SABNZBD
@@ -38,7 +38,7 @@ services:
       PUID: 997
       PGID: 114
     volumes:
-      - /media/server/config/sonarr:/config
+      - ${CONF_DIR}/sonarr:/config
       - tvshows:/tv
       - downloads:/downloads
   radarr:
@@ -54,7 +54,7 @@ services:
       PUID: 993
       PGID: 114
     volumes:
-      - /media/server/config/radarr:/config
+      - ${CONF_DIR}/radarr:/config
       - movies:/movies
       - downloads:/downloads
   tautulli:
@@ -68,7 +68,7 @@ services:
       PUID: 992
       PGID: 114
     volumes:
-      - /media/server/config/tautulli:/config
+      - ${CONF_DIR}/tautulli:/config
   heimdall :
     image: linuxserver/heimdall 
     container_name: heimdall 
@@ -81,7 +81,7 @@ services:
       PUID: 991
       PGID: 114
     volumes:
-      - /media/server/config/heimdall:/config
+      - ${CONF_DIR}/heimdall:/config
   sabnzbd:
     image: linuxserver/sabnzbd
     container_name: sabnzbd
@@ -95,41 +95,60 @@ services:
       PUID: 995
       PGID: 114
     volumes:
-      - /media/server/config/sabnzbd:/config
+      - ${CONF_DIR}/sabnzbd:/config
       - movies:/movies
       - downloads:/downloads
-  # plex:
-  #   image: linuxserver/plex
-  #   container_name: plex
-  #   network_mode: "service:vpn"
-  #   restart: unless-stopped
-  #   depends_on: 
-  #     - vpn
-  #   environment: 
-  #     VERSION: docker
-  #     PUID: 996
-  #     PGID: 114
-  #   volumes:
-  #     - /media/server/config/plex:/config
-  #     - tvshows:/tv
-  #     - movies:/movies
-  #     - /media/server/media/transcoding:/transcode
-  # couchpotato:
-  #   image: linuxserver/couchpotato
-  #   container_name: couchpotato
-  #   network_mode: "service:vpn"
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - vpn
-  #   environment: 
-  #     TZ: "Europe/Berlin"
-  #     VERSION: latest
-  #     PUID: 998
-  #     PGID: 114
-  #   volumes:
-  #     - /media/server/config/couchpotato:/config
-  #     - movies:/movies
-  #     - downloads:/downloads
+  unifi_nvr:
+    image: pducharme/unifi-video-controller
+    container_name: unifi_nvr
+    restart: unless-stopped
+    environment: 
+      PUID: 989
+      PGID: 114
+    volumes: 
+      - '${UNIFI_CONFIG_DIR}:/var/lib/unifi-video'
+      - '${UNIFI_VIDEO_DIR}:/var/lib/unifi-video/videos'
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+    security_opt:
+      - apparmor:unconfined
+    ports:
+     - "10001:10001"
+     - "1935:1935"
+     - "6666:6666"
+     - "7004:7004"
+     - "7080:7080"
+     - "7442:7442"
+     - "7443:7443"
+     - "7444:7444"
+     - "7445:7445"
+     - "7446:7446"
+     - "7447:7447"
+  deconz:
+    image: marthoc/deconz
+    container_name: deconz_service
+    restart: unless-stopeed
+    ports:
+      - "40850:40850"
+      - "40860:40860"
+      - "40870:40870"
+    volumes:
+      - ${DECONZ_CONFIG_DIR}:/root/.local/share/dresden-elektronik/deCONZ
+    devices:
+      - /dev/ttyACM0
+    environment:
+      - DECONZ_WEB_PORT=40850
+      - DECONZ_WS_PORT=40860
+      - DECONZ_VNC_MODE=1
+      - DECONZ_VNC_PORT=40870
+      - DECONZ_VNC_PASSWORD=geheim123
+      - DEBUG_INFO=1
+      - DEBUG_APS=1
+      - DEBUG_ZCL=1
+      - DEBUG_ZDP=1
+      - DEBUG_OTAU=1
+      - DECONZ_DEVICE=/dev/ttyACM0
 
 networks:
   default:
@@ -139,23 +158,23 @@ volumes:
     driver: local
     driver_opts: 
       type: none
-      device: /media/server/media/tvshows
+      device: ${TVSHOW_DIR}
       o: bind
   movies:
     driver: local
     driver_opts: 
       type: none
-      device: /media/server/media/movies
+      device: ${MOVIE_DIR}
       o: bind
   downloads:
     driver: local
     driver_opts: 
       type: none
-      device: /media/server/media/downloads
+      device: ${DOWNLOAD_DIR}
       o: bind
   incomplete_downloads:
     driver: local
     driver_opts: 
       type: none
-      device: /media/server/media/downloads/incomplete
+      device: ${DOWNLOAD_DIR}/incomplete
       o: bind
