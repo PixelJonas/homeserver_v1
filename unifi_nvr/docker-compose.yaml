@@ -37,3 +37,4 @@ volumes:
     driver_opts: 
       type: none
       device: /media/server/unifi/configuration
+      o: bind
