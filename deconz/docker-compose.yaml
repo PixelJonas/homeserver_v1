@@ -1,15 +1,15 @@
-version: "2"
+version: "3"
 services:
   deconz:
     image: marthoc/deconz
     container_name: deconz_service
-    restart: always
+    restart: unless-stopeed
     ports:
       - "40850:40850"
       - "40860:40860"
       - "40870:40870"
     volumes:
-      - /opt/deconz:/root/.local/share/dresden-elektronik/deCONZ
+      - deconz_config:/root/.local/share/dresden-elektronik/deCONZ
     devices:
       - /dev/ttyACM0
     environment:
@@ -24,3 +24,10 @@ services:
       - DEBUG_ZDP=1
       - DEBUG_OTAU=1
       - DECONZ_DEVICE=/dev/ttyACM0
+
+volumes: 
+  deconz_config:
+    driver: local
+    driver_opts: 
+      type: none
+      device: /media/server/deconz
