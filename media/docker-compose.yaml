@@ -149,6 +149,15 @@ services:
       - DEBUG_ZDP=1
       - DEBUG_OTAU=1
       - DECONZ_DEVICE=/dev/ttyACM0
+  facebox:
+    image: machinebox/facebox
+    container_name: facebox
+    restart: unless-stopped
+    ports:
+      - 8280:80
+    environment:
+      - MB_KEY=ZDRjZWIwMmFmZjkzZTgyNDk4ZjVhMTdjOWQxNzhjNGQ.FsDTi-L0HnaIEsDv993cKDOmW-8P9MIqbV-KO3iZgqI5Gb-pGa3Kqy0IpmTOHt2uYxrGRROPrn_pwWQ0i-U4mg
+      - MB_FACEBOX_DISABLE_RECOGNITION=false
 
 networks:
   default:
