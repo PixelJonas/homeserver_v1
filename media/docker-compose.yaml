@@ -180,22 +180,36 @@ services:
     image: machinebox/facebox_noavx
     container_name: facebox
     restart: unless-stopped
-    ports:
-      - 8280:8080
+    networks:
+      - web
+    expose:
+      - 8080
     environment:
       - MB_KEY=ZDRjZWIwMmFmZjkzZTgyNDk4ZjVhMTdjOWQxNzhjNGQ.FsDTi-L0HnaIEsDv993cKDOmW-8P9MIqbV-KO3iZgqI5Gb-pGa3Kqy0IpmTOHt2uYxrGRROPrn_pwWQ0i-U4mg
       - MB_FACEBOX_DISABLE_RECOGNITION=false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.facebox.rule=Host(`facebox.janz.digital`)"
+      - "traefik.http.routers.facebox.entrypoints=websecure"
+      - "traefik.http.routers.facebox.tls.certresolver=mytlschallenge"
   traefik:
     image: traefik:v2.0.0-rc3
     container_name: traefik
     command:
       #- "--log.level=DEBUG"
       - "--api.insecure=true"
-      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
       - "--certificatesresolvers.mytlschallenge.acme.email=janz.jonas@gmail.com"
       - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+    labels:
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     restart: always
     ports:
       - 8456:8080
@@ -223,7 +237,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.janz.digital`)"
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
+      - "traefik.http.routers.bitwarden.tls.certresolver=mytlschallenge"
 
 
 networks:
