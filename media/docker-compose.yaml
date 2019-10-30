@@ -1,30 +1,51 @@
 version: '3'
 services:
+  unifi_controller:
+    image: linuxserver/unifi-controller
+    container_name: unifi-controller
+    environment:
+      - PUID=987
+      - PGID=114
+    networks:
+      - web
+      - default
+    volumes:
+      - /media/server/config/unifi_controller:/config
+    ports:
+      - 3478:3478/udp
+      - 10001:10001/udp
+      - 8080:8080
+      - 8081:8081
+      - 8443:8443
+      - 8843:8843
+      - 8880:8880
+      - 6789:6789
+    restart: unless-stopped
   vpn:
     image: dperson/openvpn-client
     container_name: openvpn
     cap_add:
       - net_admin
-    security_opt: 
+    security_opt:
       - label:disable
-    environment: 
+    environment:
       TZ: Europe/Berlin
-    networks: 
+    networks:
       - default
     read_only: true
-    tmpfs: 
+    tmpfs:
       - /run
       - /tmp
     restart: unless-stopped
     stdin_open: true
     tty: true
-    volumes: 
+    volumes:
       - /dev/net:/dev/net:z
       - ${CONF_DIR}/openvpn:/vpn
-    ports: 
-      - "8080:8080" # SABNZBD
+    ports:
+      - "8680:8080" # SABNZBD
       - "9090:9090" # SABNZBD
-    command: "-r 192.168.178.0/24"
+    command: "-r 192.168.1.0/24"
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
@@ -33,7 +54,7 @@ services:
       - "8989:8989"
     depends_on:
       - vpn
-    environment: 
+    environment:
       TZ: "Europe/Berlin"
       PUID: 997
       PGID: 114
@@ -49,7 +70,7 @@ services:
       - "7878:7878"
     depends_on:
       - vpn
-    environment: 
+    environment:
       TZ: "Europe/Berlin"
       PUID: 993
       PGID: 114
@@ -63,20 +84,23 @@ services:
     restart: unless-stopped
     ports:
       - 8181:8181
-    environment: 
+    environment:
       TZ: "Europe/Berlin"
       PUID: 992
       PGID: 114
     volumes:
       - ${CONF_DIR}/tautulli:/config
   heimdall :
-    image: linuxserver/heimdall 
-    container_name: heimdall 
+    image: linuxserver/heimdall
+    container_name: heimdall
     restart: unless-stopped
-    ports: 
+    ports:
       - 8090:80
       - 8043:443
-    environment: 
+    networks:
+      - web
+      - default
+    environment:
       TZ: "Europe/Berlin"
       PUID: 991
       PGID: 114
@@ -89,7 +113,7 @@ services:
     restart: unless-stopped
     depends_on:
       - vpn
-    environment: 
+    environment:
       TZ: "Europe/Berlin"
       VERSION: latest
       PUID: 995
@@ -102,10 +126,13 @@ services:
     image: pducharme/unifi-video-controller
     container_name: unifi_nvr
     restart: unless-stopped
-    environment: 
+    networks:
+      - web
+      - default
+    environment:
       PUID: 989
       PGID: 114
-    volumes: 
+    volumes:
       - '${UNIFI_CONFIG_DIR}:/var/lib/unifi-video'
       - '${UNIFI_VIDEO_DIR}:/var/lib/unifi-video/videos'
     cap_add:
@@ -150,40 +177,77 @@ services:
       - DEBUG_OTAU=1
       - DECONZ_DEVICE=/dev/ttyACM0
   facebox:
-    image: machinebox/facebox
+    image: machinebox/facebox_noavx
     container_name: facebox
     restart: unless-stopped
     ports:
-      - 8280:80
+      - 8280:8080
     environment:
       - MB_KEY=ZDRjZWIwMmFmZjkzZTgyNDk4ZjVhMTdjOWQxNzhjNGQ.FsDTi-L0HnaIEsDv993cKDOmW-8P9MIqbV-KO3iZgqI5Gb-pGa3Kqy0IpmTOHt2uYxrGRROPrn_pwWQ0i-U4mg
       - MB_FACEBOX_DISABLE_RECOGNITION=false
+  traefik:
+    image: traefik
+    container_name: traefik
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CONF_DIR}/traefik.toml:/traefik.toml
+      - ${CONF_DIR}/acme.json:/acme.json
+  bitwarden:
+    image: bitwardenrs/server
+    container_name: bitwarden
+    restart: unless-stopped
+    networks:
+      - web
+    expose:
+      - "80"
+    environment:
+      WEBSOCKET_ENABLED: "true"
+      ADMIN_TOKEN: ${BITWARDEN_ADMIN_TOKEN}
+      SIGNUPS_ALLOWED: "true"
+    volumes:
+      - ${CONF_DIR}/bitwarden/:/data/
+    labels:
+      - "traefik.backend=bitwarden"
+      - "traefik.docker.network=web"
+      - "traefik.frontend.rule=Host:bitwarden.janz.digital"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.default.protocol=http"
+
 
 networks:
   default:
+  web:
+    external: true
 
-volumes: 
+volumes:
   tvshows:
     driver: local
-    driver_opts: 
+    driver_opts:
       type: none
       device: ${TVSHOW_DIR}
       o: bind
   movies:
     driver: local
-    driver_opts: 
+    driver_opts:
       type: none
       device: ${MOVIE_DIR}
       o: bind
   downloads:
     driver: local
-    driver_opts: 
+    driver_opts:
       type: none
       device: ${DOWNLOAD_DIR}
       o: bind
   incomplete_downloads:
     driver: local
-    driver_opts: 
+    driver_opts:
       type: none
       device: ${DOWNLOAD_DIR}/incomplete
       o: bind
