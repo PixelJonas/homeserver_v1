@@ -205,7 +205,7 @@ services:
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
       - "--certificatesresolvers.mytlschallenge.acme.email=${TRAEFIK_ACME_EMAIL}"
       - "--certificatesresolvers.mytlschallenge.acme.storage=/etc/traefik/acme.json"
-      - "--providers.file.filename=/etc/traefik/traefik.yaml"
+      - "--providers.file.filename=/etc/traefik/dyn-traefik.yaml"
       - "--providers.file.watch=true"
     labels:
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
