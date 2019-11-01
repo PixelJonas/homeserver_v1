@@ -189,7 +189,7 @@ services:
       - MB_FACEBOX_DISABLE_RECOGNITION=false
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.facebox.rule=Host(`facebox.janz.digital`)"
+      - "traefik.http.routers.facebox.rule=Host(`facebox.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.facebox.entrypoints=websecure"
       - "traefik.http.routers.facebox.tls.certresolver=mytlschallenge"
   traefik:
@@ -204,7 +204,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
       - "--certificatesresolvers.mytlschallenge.acme.email=janz.jonas@gmail.com"
-      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.mytlschallenge.acme.storage=/etc/traefik/acme.json"
     labels:
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
@@ -213,12 +213,13 @@ services:
     restart: always
     ports:
       - 8456:8080
+      - 80:80
       - 443:443
     networks:
       - web
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${CONF_DIR}/traefik:/letsencrypt
+      - ${CONF_DIR}/traefik:/etc/traefik
   bitwarden:
     image: bitwardenrs/server
     container_name: bitwarden
@@ -235,7 +236,7 @@ services:
       - ${CONF_DIR}/bitwarden/:/data/
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.janz.digital`)"
+      - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
       - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
       - "traefik.http.routers.bitwarden.tls.certresolver=mytlschallenge"
