@@ -216,7 +216,7 @@ services:
       - "traefik.http.routers.traefik_dashboard.rule=Host(`traefik.${TRAEFIK_INTERNAL_DOMAIN}`)"
       - "traefik.http.routers.traefik_dashboard.entrypoints=websecure"
       - "traefik.http.services.traefik_dashboard.loadbalancer.server.port=8080"
-      - "traefik.http.routers.traefik_dashboard.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.traefik_dashboard.tls.domains.main=traefik.${TRAEFIK_INTERNAL_DOMAIN}"
     restart: always
     ports:
       - 80:80
