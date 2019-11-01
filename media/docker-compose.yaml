@@ -201,18 +201,24 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.exposed bydefault=false"
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
-      - "--certificatesresolvers.mytlschallenge.acme.email=janz.jonas@gmail.com"
+      - "--certificatesresolvers.mytlschallenge.acme.email=${TRAEFIK_ACME_EMAIL}"
       - "--certificatesresolvers.mytlschallenge.acme.storage=/etc/traefik/acme.json"
+      - "--providers.file.filename=/etc/traefik/traefik.yaml"
+      - "--providers.file.watch=true"
     labels:
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik_dashboard.rule=Host(`traefik.${TRAEFIK_INTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.traefik_dashboard.entrypoints=websecure"
+      - "traefik.http.services.traefik_dashboard.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik_dashboard.tls.certresolver=mytlschallenge"
     restart: always
     ports:
-      - 8456:8080
       - 80:80
       - 443:443
     networks:
