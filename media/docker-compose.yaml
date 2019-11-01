@@ -221,6 +221,7 @@ services:
     ports:
       - 80:80
       - 443:443
+      - 8456:8080
     networks:
       - web
     volumes:
