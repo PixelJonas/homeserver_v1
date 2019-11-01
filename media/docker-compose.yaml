@@ -201,7 +201,7 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--providers.docker=true"
-      - "--providers.docker.exposed bydefault=false"
+      - "--providers.docker.exposedbydefault=false"
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
       - "--certificatesresolvers.mytlschallenge.acme.email=${TRAEFIK_ACME_EMAIL}"
       - "--certificatesresolvers.mytlschallenge.acme.storage=/etc/traefik/acme.json"
