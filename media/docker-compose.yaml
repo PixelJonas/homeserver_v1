@@ -182,6 +182,8 @@ services:
     restart: unless-stopped
     networks:
       - web
+    ports:
+      - "8280:8080"
     expose:
       - 8080
     environment:
