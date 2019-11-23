@@ -195,7 +195,7 @@ services:
       - "traefik.http.routers.facebox.entrypoints=websecure"
       - "traefik.http.routers.facebox.tls.certresolver=mytlschallenge"
   traefik:
-    image: traefik:v2.0.0-rc3
+    image: traefik:v2.0
     container_name: traefik
     command:
       #- "--log.level=DEBUG"
