@@ -244,11 +244,12 @@ services:
       - '68:68'
       - '853:853/tcp'
       - '3000:3000/tcp'
+      - '8780:8780/tcp'
     networks:
       - web
     volumes:
-      - ${CONF_DIR}/adguard:/opt/adguard/conf
-      - ${ADGUARD_DATA_DIR}:/opt/adguard/work
+      - ${CONF_DIR}/adguard:/opt/adguardhome/conf
+      - ${ADGUARD_DATA_DIR}:/opt/adguardhome/work
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.adguard.rule=Host(`adguard.${TRAEFIK_EXTERNAL_DOMAIN}`)"
