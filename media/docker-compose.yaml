@@ -10,7 +10,7 @@ services:
       - web
       - default
     volumes:
-      - /media/server/config/unifi_controller:/config
+      - ${CONF_DIR}/unifi_controller:/config
     ports:
       - 3478:3478/udp
       - 10001:10001/udp
@@ -229,6 +229,32 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${CONF_DIR}/traefik:/etc/traefik
+  adguard:
+    image: adguard/adguardhome
+    container_name: adguard
+    restart: unless-stopped
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+    expose: 
+      - "80"
+    ports:
+      - '53:53'
+      - '67:67/udp'
+      - '68:68'
+      - '853:853/tcp'
+      - '3000:3000/tcp'
+    networks:
+      - web
+    volumes:
+      - ${CONF_DIR}/adguard:/opt/adguard/conf
+      - ${ADGUARD_DATA_DIR}:/opt/adguard/work
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adguard.rule=Host(`adguard.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.adguard.entrypoints=websecure"
+      - "traefik.http.routers.adguard.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.adguard.loadbalancer.server.port=80"
   bitwarden:
     image: bitwardenrs/server
     container_name: bitwarden
