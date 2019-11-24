@@ -244,7 +244,7 @@ services:
       - '68:68'
       - '853:853/tcp'
       - '3000:3000/tcp'
-      - '8780:8780/tcp'
+      - '8780:80/tcp'
     networks:
       - web
     volumes:
