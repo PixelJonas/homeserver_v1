@@ -21,6 +21,12 @@ services:
       - 8880:8880
       - 6789:6789
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.unificontroller.rule=Host(`unifi.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.unificontroller.entrypoints=websecure"
+      - "traefik.http.services.unificontroller.loadbalancer.server.port=8443"
+      - "traefik.http.routers.unificontroller.tls.certresolver=mytlschallenge"
   vpn:
     image: dperson/openvpn-client
     container_name: openvpn
@@ -50,8 +56,8 @@ services:
     image: linuxserver/sonarr
     container_name: sonarr
     restart: unless-stopped
-    ports:
-      - "8989:8989"
+    expose:
+      - "8989"
     depends_on:
       - vpn
     environment:
@@ -62,12 +68,18 @@ services:
       - ${CONF_DIR}/sonarr:/config
       - tvshows:/tv
       - downloads:/downloads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.sonarr.entrypoints=websecure"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8443"
+      - "traefik.http.routers.sonarr.tls.certresolver=mytlschallenge"
   radarr:
     image: linuxserver/radarr
     container_name: radarr
     restart: unless-stopped
-    ports:
-      - "7878:7878"
+    expose:
+      - "7878"
     depends_on:
       - vpn
     environment:
@@ -78,25 +90,34 @@ services:
       - ${CONF_DIR}/radarr:/config
       - movies:/movies
       - downloads:/downloads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.radarr.entrypoints=websecure"
+      - "traefik.http.routers.radarr.tls.certresolver=mytlschallenge"
   tautulli:
     image: linuxserver/tautulli
     container_name: tautulli
     restart: unless-stopped
-    ports:
-      - 8181:8181
+    expose:
+      - "8181"
     environment:
       TZ: "Europe/Berlin"
       PUID: 992
       PGID: 114
     volumes:
       - ${CONF_DIR}/tautulli:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tautulli.rule=Host(`tautulli.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.tautulli.entrypoints=websecure"
+      - "traefik.http.routers.tautulli.tls.certresolver=mytlschallenge"
   heimdall :
     image: linuxserver/heimdall
     container_name: heimdall
     restart: unless-stopped
-    ports:
-      - 8090:80
-      - 8043:443
+    expose:
+      - "80"
     networks:
       - web
       - default
@@ -106,6 +127,11 @@ services:
       PGID: 114
     volumes:
       - ${CONF_DIR}/heimdall:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.heimdall.rule=Host(`heimdall.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.heimdall.entrypoints=websecure"
+      - "traefik.http.routers.heimdall.tls.certresolver=mytlschallenge"
   sabnzbd:
     image: linuxserver/sabnzbd
     container_name: sabnzbd
@@ -140,18 +166,25 @@ services:
       - DAC_READ_SEARCH
     security_opt:
       - apparmor:unconfined
+    expose: 
+      - "7080"
     ports:
      - "10001:10001"
      - "1935:1935"
      - "6666:6666"
      - "7004:7004"
-     - "7080:7080"
      - "7442:7442"
      - "7443:7443"
      - "7444:7444"
      - "7445:7445"
      - "7446:7446"
      - "7447:7447"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.unifinvr.rule=Host(`nvr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.unifinvr.entrypoints=websecure"
+      - "traefik.http.services.unifinvr.loadbalancer.server.port=7080"
+      - "traefik.http.routers.unifinvr.tls.certresolver=mytlschallenge"
   deconz:
     image: marthoc/deconz
     container_name: deconz_service
