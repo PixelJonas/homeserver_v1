@@ -187,7 +187,7 @@ services:
     expose:
       - 8080
     environment:
-      - MB_KEY=ZDRjZWIwMmFmZjkzZTgyNDk4ZjVhMTdjOWQxNzhjNGQ.FsDTi-L0HnaIEsDv993cKDOmW-8P9MIqbV-KO3iZgqI5Gb-pGa3Kqy0IpmTOHt2uYxrGRROPrn_pwWQ0i-U4mg
+      - MB_KEY=${FACEBOX_MB_KEY}
       - MB_FACEBOX_DISABLE_RECOGNITION=false
     labels:
       - "traefik.enable=true"
