@@ -11,6 +11,8 @@ services:
       - default
     volumes:
       - ${CONF_DIR}/unifi_controller:/config
+    expose:
+      - "8443"
     ports:
       - 3478:3478/udp
       - 10001:10001/udp
@@ -58,8 +60,8 @@ services:
     restart: unless-stopped
     expose:
       - "8989"
-    depends_on:
-      - vpn
+    ports:
+      - "8989:8989"
     environment:
       TZ: "Europe/Berlin"
       PUID: 997
@@ -72,14 +74,15 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sonarr.rule=Host(`sonarr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.sonarr.entrypoints=websecure"
-      - "traefik.http.services.sonarr.loadbalancer.server.port=8443"
       - "traefik.http.routers.sonarr.tls.certresolver=mytlschallenge"
   radarr:
     image: linuxserver/radarr
     container_name: radarr
     restart: unless-stopped
-    expose:
+    expose: 
       - "7878"
+    ports:
+      - "7878:7878"
     depends_on:
       - vpn
     environment:
@@ -139,6 +142,8 @@ services:
     restart: unless-stopped
     depends_on:
       - vpn
+    expose: 
+      - "8080"
     environment:
       TZ: "Europe/Berlin"
       VERSION: latest
@@ -148,6 +153,12 @@ services:
       - ${CONF_DIR}/sabnzbd:/config
       - movies:/movies
       - downloads:/downloads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sabnbzd.rule=Host(`sabnbzd.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.sabnbzd.entrypoints=websecure"
+      - "traefik.http.services.sabnbzd.loadbalancer.server.port=8080"
+      - "traefik.http.routers.sabnbzd.tls.certresolver=mytlschallenge"
   unifi_nvr:
     image: pducharme/unifi-video-controller
     container_name: unifi_nvr
@@ -166,13 +177,14 @@ services:
       - DAC_READ_SEARCH
     security_opt:
       - apparmor:unconfined
-    expose: 
+    expose:
       - "7080"
     ports:
      - "10001:10001"
      - "1935:1935"
      - "6666:6666"
      - "7004:7004"
+     - "7080:7080"
      - "7442:7442"
      - "7443:7443"
      - "7444:7444"
@@ -226,7 +238,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.facebox.rule=Host(`facebox.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.facebox.entrypoints=websecure"
-      - "traefik.http.routers.facebox.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.facebox.tls=true"
   traefik:
     image: traefik:v2.0
     container_name: traefik
@@ -248,10 +260,10 @@ services:
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik_dashboard.rule=Host(`traefik.${TRAEFIK_INTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.traefik_dashboard.rule=Host(`traefik.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.traefik_dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik_dashboard.tls.true"
       - "traefik.http.services.traefik_dashboard.loadbalancer.server.port=8080"
-      - "traefik.http.routers.traefik_dashboard.tls.domains.main=traefik.${TRAEFIK_INTERNAL_DOMAIN}"
     restart: always
     ports:
       - 80:80
@@ -269,7 +281,7 @@ services:
   #   dns:
   #     - 127.0.0.1
   #     - 1.1.1.1
-  #   expose: 
+  #   expose:
   #     - "80"
   #   ports:
   #     - '53:53'
