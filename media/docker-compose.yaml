@@ -142,8 +142,6 @@ services:
     restart: unless-stopped
     depends_on:
       - vpn
-    expose: 
-      - "8080"
     environment:
       TZ: "Europe/Berlin"
       VERSION: latest
@@ -153,12 +151,6 @@ services:
       - ${CONF_DIR}/sabnzbd:/config
       - movies:/movies
       - downloads:/downloads
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sabnbzd.rule=Host(`sabnbzd.${TRAEFIK_EXTERNAL_DOMAIN}`)"
-      - "traefik.http.routers.sabnbzd.entrypoints=websecure"
-      - "traefik.http.services.sabnbzd.loadbalancer.server.port=8080"
-      - "traefik.http.routers.sabnbzd.tls.certresolver=mytlschallenge"
   unifi_nvr:
     image: pducharme/unifi-video-controller
     container_name: unifi_nvr
