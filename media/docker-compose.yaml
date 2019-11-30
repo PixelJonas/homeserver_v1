@@ -27,8 +27,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.unificontroller.rule=Host(`unifi.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.unificontroller.entrypoints=websecure"
+      - "traefik.http.routers.unificontroller.tls=true"
       - "traefik.http.services.unificontroller.loadbalancer.server.port=8443"
-      - "traefik.http.routers.unificontroller.tls.certresolver=mytlschallenge"
   vpn:
     image: dperson/openvpn-client
     container_name: openvpn
@@ -73,13 +73,13 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sonarr.rule=Host(`sonarr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.sonarr.tls=true"
       - "traefik.http.routers.sonarr.entrypoints=websecure"
-      - "traefik.http.routers.sonarr.tls.certresolver=mytlschallenge"
   radarr:
     image: linuxserver/radarr
     container_name: radarr
     restart: unless-stopped
-    expose: 
+    expose:
       - "7878"
     ports:
       - "7878:7878"
@@ -96,8 +96,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.radarr.rule=Host(`radarr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.radarr.tls=true"
       - "traefik.http.routers.radarr.entrypoints=websecure"
-      - "traefik.http.routers.radarr.tls.certresolver=mytlschallenge"
   tautulli:
     image: linuxserver/tautulli
     container_name: tautulli
@@ -113,8 +113,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.tautulli.rule=Host(`tautulli.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.tautulli.tls=true"
       - "traefik.http.routers.tautulli.entrypoints=websecure"
-      - "traefik.http.routers.tautulli.tls.certresolver=mytlschallenge"
   heimdall :
     image: linuxserver/heimdall
     container_name: heimdall
@@ -133,8 +133,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.heimdall.rule=Host(`heimdall.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.heimdall.tls=true"
       - "traefik.http.routers.heimdall.entrypoints=websecure"
-      - "traefik.http.routers.heimdall.tls.certresolver=mytlschallenge"
   sabnzbd:
     image: linuxserver/sabnzbd
     container_name: sabnzbd
@@ -187,8 +187,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.unifinvr.rule=Host(`nvr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.unifinvr.entrypoints=websecure"
+      - "traefik.http.routers.unifinvr.tls=true"
       - "traefik.http.services.unifinvr.loadbalancer.server.port=7080"
-      - "traefik.http.routers.unifinvr.tls.certresolver=mytlschallenge"
   deconz:
     image: marthoc/deconz
     container_name: deconz_service
@@ -229,8 +229,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.facebox.rule=Host(`facebox.${TRAEFIK_EXTERNAL_DOMAIN}`)"
-      - "traefik.http.routers.facebox.entrypoints=websecure"
       - "traefik.http.routers.facebox.tls=true"
+      - "traefik.http.routers.facebox.entrypoints=websecure"
   traefik:
     image: traefik:v2.0
     container_name: traefik
@@ -254,7 +254,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik_dashboard.rule=Host(`traefik.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.traefik_dashboard.entrypoints=websecure"
-      - "traefik.http.routers.traefik_dashboard.tls.true"
+      - "traefik.http.routers.traefik_dashboard.tls=true"
       - "traefik.http.services.traefik_dashboard.loadbalancer.server.port=8080"
     restart: always
     ports:
@@ -311,8 +311,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
+      - "traefik.http.routers.bitwarden.tls=true"
       - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
-      - "traefik.http.routers.bitwarden.tls.certresolver=mytlschallenge"
 
 
 networks:
