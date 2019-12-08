@@ -1,0 +1,5 @@
+FROM nodered/node-red
+
+ARG NPM_PACKAGES
+
+RUN npm install --no-optional --only=production "$NPM_PACKAGES"
