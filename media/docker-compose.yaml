@@ -60,6 +60,8 @@ services:
     restart: unless-stopped
     expose:
       - "8989"
+    networks: 
+      - "web"
     ports:
       - "8989:8989"
     environment:
@@ -81,6 +83,8 @@ services:
     restart: unless-stopped
     expose:
       - "7878"
+    networks: 
+      - "web"
     ports:
       - "7878:7878"
     depends_on:
@@ -104,6 +108,8 @@ services:
     restart: unless-stopped
     expose:
       - "8181"
+    networks: 
+      - "web"
     environment:
       TZ: "Europe/Berlin"
       PUID: 992
@@ -171,6 +177,8 @@ services:
       - apparmor:unconfined
     expose:
       - "7080"
+    networks: 
+      - "web"
     ports:
      - "10001:10001"
      - "1935:1935"
@@ -221,6 +229,10 @@ services:
       - web
     ports:
       - "8280:8080"
+    expose: 
+      - "8080"
+    networks: 
+      - "web"
     expose:
       - 8080
     environment:
@@ -321,6 +333,8 @@ services:
         NPM_PACKAGES: "node-red-contrib-light-scheduler node-red-contrib-config node-red-contrib-fs"
     expose:
     - "1880"
+    networks: 
+      - "web"
     volumes: 
       - ${CONF_DIR}/nodered:/data
     labels:
