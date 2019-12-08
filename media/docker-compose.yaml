@@ -313,6 +313,21 @@ services:
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
       - "traefik.http.routers.bitwarden.tls=true"
       - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
+  node_red:
+    build:
+      context: .
+      dockerfile: Dockerfile.nodered
+      args:
+        NPM_PACKAGES: "node-red-contrib-light-scheduler node-red-contrib-config node-red-contrib-fs"
+    expose:
+    - "1880"
+    volumes: 
+      - ${CONF_DIR}/nodered:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node_red.rule=Host(`red.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.node_red.tls=true"
+      - "traefik.http.routers.node_red.entrypoints=websecure"
 
 
 networks:
