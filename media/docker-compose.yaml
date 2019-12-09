@@ -322,7 +322,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
-      - "traefik.http.routers.bitwarden.tls=true"
+      - "traefik.http.routers.bitwarden.tls.certresolver=mytlschallenge"
       - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
   node_red:
     restart: unless-stopped
