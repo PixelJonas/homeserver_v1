@@ -196,30 +196,6 @@ services:
       - "traefik.http.routers.unifinvr.entrypoints=websecure"
       - "traefik.http.routers.unifinvr.tls=true"
       - "traefik.http.services.unifinvr.loadbalancer.server.port=7080"
-  deconz:
-    image: marthoc/deconz
-    container_name: deconz_service
-    restart: unless-stopped
-    ports:
-      - "40850:40850"
-      - "40860:40860"
-      - "40870:40870"
-    volumes:
-      - ${DECONZ_CONFIG_DIR}:/root/.local/share/dresden-elektronik/deCONZ
-    devices:
-      - /dev/ttyACM0
-    environment:
-      - DECONZ_WEB_PORT=40850
-      - DECONZ_WS_PORT=40860
-      - DECONZ_VNC_MODE=1
-      - DECONZ_VNC_PORT=40870
-      - DECONZ_VNC_PASSWORD=geheim123
-      - DEBUG_INFO=1
-      - DEBUG_APS=1
-      - DEBUG_ZCL=1
-      - DEBUG_ZDP=1
-      - DEBUG_OTAU=1
-      - DECONZ_DEVICE=/dev/ttyACM0
   facebox:
     image: machinebox/facebox_noavx
     container_name: facebox
