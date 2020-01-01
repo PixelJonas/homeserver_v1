@@ -101,6 +101,7 @@ services:
       - "traefik.http.routers.radarr.rule=Host(`radarr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.radarr.tls=true"
       - "traefik.http.routers.radarr.entrypoints=websecure"
+      - "traefik.http.routers.radarr.middlewares=secured"
   tautulli:
     image: linuxserver/tautulli
     container_name: tautulli
@@ -278,11 +279,11 @@ services:
       - INSECURE_COOKIE=1
       - AUTH_HOST=auth.${TRAEFIK_EXTERNAL_DOMAIN}
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.auth_forward.entrypoints=https
-      - traefik.http.routers.auth_forward.rule=Host(`auth.${TRAEFIK_EXTERNAL_DOMAIN}`)
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth_forward.entrypoints=https"
+      - "traefik.http.routers.auth_forward.rule=Host(`auth.${TRAEFIK_EXTERNAL_DOMAIN}`)"
 
-      - traefik.http.routers.auth_forward.middlewares=secured
+      - "traefik.http.routers.auth_forward.middlewares=secured"
   # adguard:
   #   image: adguard/adguardhome
   #   container_name: adguard
