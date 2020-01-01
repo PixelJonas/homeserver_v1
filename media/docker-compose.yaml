@@ -226,6 +226,7 @@ services:
       - "--api.insecure=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.auth.forward.address=https://auth.janz.digital"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
@@ -237,7 +238,11 @@ services:
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.secured.chain.middlewares=redirect-to-https@docker,auth@docker"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.auth.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.auth.forwardauth.Address=http://traefik-auth-forward:4181"
+      - "traefik.http.middlewares.auth.forwardauth.authResponseHeaders=X-Forwarded-User, X-WebAuth-User"
       - "traefik.enable=true"
       - "traefik.http.routers.traefik_dashboard.rule=Host(`traefik.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.traefik_dashboard.entrypoints=websecure"
@@ -253,6 +258,31 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${CONF_DIR}/traefik:/etc/traefik
+  traefik-auth-forward:
+    image: thomseddon/traefik-forward-auth:2
+    container_name: traefik_auth_forward
+    restart: unless-stopped
+    networks:
+      - web
+    expose: 
+      - "4181"
+    networks: 
+      - "web"
+    expose:
+      - 8080
+    environment:
+      - PROVIDERS_GOOGLE_CLIENT_ID=${AUTH_FORWARD_GOOGLE_CLIENT_ID}
+      - PROVIDERS_GOOGLE_CLIENT_SECRET=${AUTH_FORWARD_GOOGLE_CLIENT_SECRET}
+      - SECRET=${AUTH_FORWARD_SECRET}
+      - COOKIE_DOMAIN=${TRAEFIK_EXTERNAL_DOMAIN}
+      - INSECURE_COOKIE=1
+      - AUTH_HOST=auth.${TRAEFIK_EXTERNAL_DOMAIN}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.auth_forward.entrypoints=https
+      - traefik.http.routers.auth_forward.rule=Host(`auth.${TRAEFIK_EXTERNAL_DOMAIN}`)
+
+      - traefik.http.routers.auth_forward.middlewares=secured
   # adguard:
   #   image: adguard/adguardhome
   #   container_name: adguard
