@@ -8,9 +8,10 @@ services:
       - PGID=114
     networks:
       - web
-      - default
     volumes:
-      - /media/server/config/unifi_controller:/config
+      - ${CONF_DIR}/unifi_controller:/config
+    expose:
+      - "8443"
     ports:
       - 3478:3478/udp
       - 10001:10001/udp
@@ -21,6 +22,12 @@ services:
       - 8880:8880
       - 6789:6789
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.unificontroller.rule=Host(`unifi.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.unificontroller.entrypoints=websecure"
+      - "traefik.http.routers.unificontroller.tls=true"
+      - "traefik.http.services.unificontroller.loadbalancer.server.port=8443"
   vpn:
     image: dperson/openvpn-client
     container_name: openvpn
@@ -50,10 +57,12 @@ services:
     image: linuxserver/sonarr
     container_name: sonarr
     restart: unless-stopped
+    expose:
+      - "8989"
+    networks: 
+      - "web"
     ports:
       - "8989:8989"
-    depends_on:
-      - vpn
     environment:
       TZ: "Europe/Berlin"
       PUID: 997
@@ -62,10 +71,19 @@ services:
       - ${CONF_DIR}/sonarr:/config
       - tvshows:/tv
       - downloads:/downloads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.routers.sonarr.entrypoints=websecure"
   radarr:
     image: linuxserver/radarr
     container_name: radarr
     restart: unless-stopped
+    expose:
+      - "7878"
+    networks: 
+      - "web"
     ports:
       - "7878:7878"
     depends_on:
@@ -78,25 +96,37 @@ services:
       - ${CONF_DIR}/radarr:/config
       - movies:/movies
       - downloads:/downloads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.radarr.tls=true"
+      - "traefik.http.routers.radarr.entrypoints=websecure"
+      - "traefik.http.routers.radarr.middlewares=secured"
   tautulli:
     image: linuxserver/tautulli
     container_name: tautulli
     restart: unless-stopped
-    ports:
-      - 8181:8181
+    expose:
+      - "8181"
+    networks: 
+      - "web"
     environment:
       TZ: "Europe/Berlin"
       PUID: 992
       PGID: 114
     volumes:
       - ${CONF_DIR}/tautulli:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tautulli.rule=Host(`tautulli.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.tautulli.tls=true"
+      - "traefik.http.routers.tautulli.entrypoints=websecure"
   heimdall :
     image: linuxserver/heimdall
     container_name: heimdall
     restart: unless-stopped
-    ports:
-      - 8090:80
-      - 8043:443
+    expose:
+      - "80"
     networks:
       - web
       - default
@@ -106,6 +136,11 @@ services:
       PGID: 114
     volumes:
       - ${CONF_DIR}/heimdall:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.heimdall.rule=Host(`heimdall.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.heimdall.tls=true"
+      - "traefik.http.routers.heimdall.entrypoints=websecure"
   sabnzbd:
     image: linuxserver/sabnzbd
     container_name: sabnzbd
@@ -140,6 +175,10 @@ services:
       - DAC_READ_SEARCH
     security_opt:
       - apparmor:unconfined
+    expose:
+      - "7080"
+    networks: 
+      - "web"
     ports:
      - "10001:10001"
      - "1935:1935"
@@ -152,73 +191,126 @@ services:
      - "7445:7445"
      - "7446:7446"
      - "7447:7447"
-  deconz:
-    image: marthoc/deconz
-    container_name: deconz_service
-    restart: unless-stopped
-    ports:
-      - "40850:40850"
-      - "40860:40860"
-      - "40870:40870"
-    volumes:
-      - ${DECONZ_CONFIG_DIR}:/root/.local/share/dresden-elektronik/deCONZ
-    devices:
-      - /dev/ttyACM0
-    environment:
-      - DECONZ_WEB_PORT=40850
-      - DECONZ_WS_PORT=40860
-      - DECONZ_VNC_MODE=1
-      - DECONZ_VNC_PORT=40870
-      - DECONZ_VNC_PASSWORD=geheim123
-      - DEBUG_INFO=1
-      - DEBUG_APS=1
-      - DEBUG_ZCL=1
-      - DEBUG_ZDP=1
-      - DEBUG_OTAU=1
-      - DECONZ_DEVICE=/dev/ttyACM0
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.unifinvr.rule=Host(`nvr.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.unifinvr.entrypoints=websecure"
+      - "traefik.http.routers.unifinvr.tls=true"
+      - "traefik.http.services.unifinvr.loadbalancer.server.port=7080"
   facebox:
     image: machinebox/facebox_noavx
     container_name: facebox
     restart: unless-stopped
     networks:
       - web
+    ports:
+      - "8280:8080"
+    expose: 
+      - "8080"
+    networks: 
+      - "web"
     expose:
       - 8080
     environment:
-      - MB_KEY=ZDRjZWIwMmFmZjkzZTgyNDk4ZjVhMTdjOWQxNzhjNGQ.FsDTi-L0HnaIEsDv993cKDOmW-8P9MIqbV-KO3iZgqI5Gb-pGa3Kqy0IpmTOHt2uYxrGRROPrn_pwWQ0i-U4mg
+      - MB_KEY=${FACEBOX_MB_KEY}
       - MB_FACEBOX_DISABLE_RECOGNITION=false
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.facebox.rule=Host(`facebox.janz.digital`)"
+      - "traefik.http.routers.facebox.rule=Host(`facebox.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.facebox.tls=true"
       - "traefik.http.routers.facebox.entrypoints=websecure"
-      - "traefik.http.routers.facebox.tls.certresolver=mytlschallenge"
   traefik:
-    image: traefik:v2.0.0-rc3
+    image: traefik:v2.0
     container_name: traefik
     command:
       #- "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.auth.forward.address=https://auth.janz.digital"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
-      - "--certificatesresolvers.mytlschallenge.acme.email=janz.jonas@gmail.com"
-      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.mytlschallenge.acme.email=${TRAEFIK_ACME_EMAIL}"
+      - "--certificatesresolvers.mytlschallenge.acme.storage=/etc/traefik/acme.json"
+      - "--providers.file.filename=/etc/traefik/dyn-traefik.yaml"
+      - "--providers.file.watch=true"
     labels:
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.secured.chain.middlewares=redirect-to-https@docker,auth@docker"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.auth.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.auth.forwardauth.Address=http://traefik-auth-forward:4181"
+      - "traefik.http.middlewares.auth.forwardauth.authResponseHeaders=X-Forwarded-User, X-WebAuth-User"
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik_dashboard.rule=Host(`traefik.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.traefik_dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik_dashboard.tls=true"
+      - "traefik.http.services.traefik_dashboard.loadbalancer.server.port=8080"
     restart: always
     ports:
-      - 8456:8080
+      - 80:80
       - 443:443
+      - 8456:8080
     networks:
       - web
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${CONF_DIR}/traefik:/letsencrypt
+      - ${CONF_DIR}/traefik:/etc/traefik
+  traefik-auth-forward:
+    image: thomseddon/traefik-forward-auth:2
+    container_name: traefik_auth_forward
+    restart: unless-stopped
+    networks:
+      - web
+    expose: 
+      - "4181"
+    networks: 
+      - "web"
+    expose:
+      - 8080
+    environment:
+      - PROVIDERS_GOOGLE_CLIENT_ID=${AUTH_FORWARD_GOOGLE_CLIENT_ID}
+      - PROVIDERS_GOOGLE_CLIENT_SECRET=${AUTH_FORWARD_GOOGLE_CLIENT_SECRET}
+      - SECRET=${AUTH_FORWARD_SECRET}
+      - COOKIE_DOMAIN=${TRAEFIK_EXTERNAL_DOMAIN}
+      - INSECURE_COOKIE=1
+      - AUTH_HOST=auth.${TRAEFIK_EXTERNAL_DOMAIN}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth_forward.entrypoints=https"
+      - "traefik.http.routers.auth_forward.rule=Host(`auth.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+
+      - "traefik.http.routers.auth_forward.middlewares=secured"
+  # adguard:
+  #   image: adguard/adguardhome
+  #   container_name: adguard
+  #   restart: unless-stopped
+  #   dns:
+  #     - 127.0.0.1
+  #     - 1.1.1.1
+  #   expose:
+  #     - "80"
+  #   ports:
+  #     - '53:53'
+  #     - '67:67/udp'
+  #     - '68:68'
+  #     - '853:853/tcp'
+  #     - '3000:3000/tcp'
+  #     - '8780:80/tcp'
+  #   networks:
+  #     - web
+  #   volumes:
+  #     - ${CONF_DIR}/adguard:/opt/adguardhome/conf
+  #     - ${ADGUARD_DATA_DIR}:/opt/adguardhome/work
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.adguard.rule=Host(`adguard.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+  #     - "traefik.http.routers.adguard.entrypoints=websecure"
+  #     - "traefik.http.routers.adguard.tls.certresolver=mytlschallenge"
+  #     - "traefik.http.services.adguard.loadbalancer.server.port=80"
   bitwarden:
     image: bitwardenrs/server
     container_name: bitwarden
@@ -235,10 +327,28 @@ services:
       - ${CONF_DIR}/bitwarden/:/data/
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.janz.digital`)"
+      - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.${TRAEFIK_EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
-      - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
       - "traefik.http.routers.bitwarden.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
+  node_red:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile.nodered
+      args:
+        NPM_PACKAGES: "node-red-contrib-light-scheduler node-red-contrib-config node-red-contrib-fs"
+    expose:
+    - "1880"
+    networks: 
+      - "web"
+    volumes: 
+      - ${CONF_DIR}/nodered:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node_red.rule=Host(`red.${TRAEFIK_EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.node_red.tls=true"
+      - "traefik.http.routers.node_red.entrypoints=websecure"
 
 
 networks:

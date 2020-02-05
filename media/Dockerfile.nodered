@@ -1,0 +1,8 @@
+FROM nodered/node-red
+
+ARG NPM_PACKAGES=""
+
+COPY package.json.nodered package.json
+
+RUN npm install --no-optional --only=production
+RUN for package in ${NPM_PACKAGES}; do npm install --no-optional --only=production "$package"; done
