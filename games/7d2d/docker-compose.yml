@@ -1,12 +1,12 @@
 version: '3'
 services:
-  unifi_controller:
+  7days2die:
     image: didstopia/7dtd-server
     container_name: 7dtd-server
     environment:
-      - PUID=987
-      - PGID=114
-      - SEVEN_DAYS_TO_DIE_TELNET_PASSWORD=${7D2D_TELNET_PASSWORD}
+      PUID: 984
+      PGID: 114
+      SEVEN_DAYS_TO_DIE_TELNET_PASSWORD: $TELNET_PASSWORD
     networks:
       - web
       - default
